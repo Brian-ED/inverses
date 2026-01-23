@@ -1,0 +1,3 @@
+name: inverses
+depend: standard-library
+include: .
