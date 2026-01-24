@@ -1,18 +1,21 @@
 module plus where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
+open import Function.Indexed.Relation.Binary.Equality using (≡-setoid)
+open import Relation.Binary using (Setoid)
 open import Data.Bool using (Bool; not; true; false)
 open import Data.Rational using (ℚ; _+_; _-_) renaming (-_ to neg_)
 open import Data.Integer using (pos; ℤ)
-open import Data.Rational.Properties as ℤₚ
 open import Data.Nat.Coprimality using (coprime-/gcd)
-zero = (Data.Rational.mkℚ (ℤ.pos 0) 0 (coprime-/gcd 0 1))
-
+open import Level using (Level) renaming (zero to lzero)
 open import Data.Product using (_×_; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ)
+open import Function using (_∘_; Inverseˡ; Inverseʳ; Inverse)
 
-open import Function
+import Data.Rational.Properties as ℤₚ
+
+zero = Data.Rational.mkℚ (ℤ.pos 0) 0 (coprime-/gcd 0 1)
 
 data Primitive : Set where
   num : ℚ → Primitive
@@ -30,7 +33,7 @@ eval (call (plusC x) (err snd)) = err (call (plusC x) (err snd))
 eval (call (plusC x) (call snd snd₁)) = err (call (plusC x) (call snd snd₁))
 eval (call (err x) snd) = err (call (err x) snd)
 eval (call (call x x₁) snd) = err (call (call x x₁) snd)
-eval (num x  ) = err (num x)
+eval (num x) = err (num x)
 eval (err (num x)) = num x
 eval (err (err x)) = err (err x)
 eval (err (call (num x) x₁)) = call (num x) x₁
@@ -60,52 +63,35 @@ unEval (call (plusC x) (plusC x₁)) = err (call (plusC x) (plusC x₁))
 unEval (call (plusC x) (err x₁)) = err (call (plusC x) (err x₁))
 unEval (call (plusC x) (call x₁ x₂)) = err (call (plusC x) (call x₁ x₂))
 unEval (call (err x) x₁) = err (call (err x) x₁)
-unEval (call (call x x₂) x₁) = err (call (call x x₂) x₁) -- err (call x x₁)
+unEval (call (call x x₂) x₁) = err (call (call x x₂) x₁)
 unEval (plusC x) = err (plusC x)
 unEval (err (plusC x)) = plusC x
 
-open import Level using (_⊔_) renaming (suc to lsuc; zero to lzero)
-open import Data.Unit using (⊤)
+infixr 2 _≡⟨_⟩_
 
-proveCongruenceEval : Congruent _≡_ _≡_ eval
-proveCongruenceEval refl = refl
+_≡⟨_⟩_ : {a : Level} {A : Set a} (x : A) {y z : A} → x ≡ y → y ≡ z → x ≡ z
+_≡⟨_⟩_ x y z = trans y z
 
-proveCongruenceUnEval : Congruent _≡_ _≡_ unEval
-proveCongruenceUnEval refl = refl
-
-open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; cong)
-open Eq.≡-Reasoning
-
-+-cancel :
-  ∀ x x₁ →
-  x₁ + (neg x) + x ≡ x₁
-+-cancel x x₁ = begin
-    x₁ + (neg x) + x
++-cancel : ∀ x x₁ → x₁ + (neg x) + x ≡ x₁
++-cancel x x₁ =
+    x₁ + neg x + x
   ≡⟨ ℤₚ.+-assoc x₁ (neg x) x ⟩
-    x₁ + ((neg x) + x)
+    x₁ + (neg x + x)
   ≡⟨ cong (x₁ +_) (ℤₚ.+-inverseˡ x) ⟩
     x₁ + zero
-  ≡⟨ +-identityʳ x₁ ⟩
-    x₁
-  ∎
+  ≡⟨ ℤₚ.+-identityʳ x₁ ⟩
+    refl
 
--+cancel :
-  ∀ x x₁ →
-  x₁ + x + (neg x) ≡ x₁
--+cancel x x₁ = begin
+-+cancel : ∀ x x₁ → x₁ + x + (neg x) ≡ x₁
+-+cancel x x₁ =
     x₁ + x + (neg x)
   ≡⟨ ℤₚ.+-assoc x₁ x (neg x) ⟩
-    x₁ + (x + (neg x))
+    x₁ + (x + neg x)
   ≡⟨ cong (x₁ +_) (ℤₚ.+-inverseʳ x) ⟩
     x₁ + zero
-  ≡⟨ +-identityʳ x₁ ⟩
-    x₁
-  ∎
+  ≡⟨ ℤₚ.+-identityʳ x₁ ⟩
+    refl
 
-proofOfPlusC-L : ∀{x x₁} → eval (unEval (call (plusC x) (num x₁))) ≡ call (plusC x) (num x₁)
-proofOfPlusC-L {x} {x₁} = cong (call (plusC x) ∘ num) (+-cancel x x₁)
-proofOfPlusC-R : ∀{x x₁} → unEval (eval (call (plusC x) (num x₁))) ≡ call (plusC x) (num x₁)
-proofOfPlusC-R {x} {x₁} = cong (call (plusC x) ∘ num) (-+cancel x x₁)
 
 lInv : {x : Primitive} → eval (unEval x) ≡ x
 lInv {num x} = refl
@@ -121,7 +107,7 @@ lInv {err (call (plusC x) (call x₁ x₂))} = refl
 lInv {err (call (err x) x₁)} = refl
 lInv {err (call (call x x₂) x₁)} = refl
 lInv {call (num x) x₁} = refl
-lInv {call (plusC x) (num x₁)} = proofOfPlusC-L
+lInv {call (plusC x) (num x₁)} = cong (call (plusC x) ∘ num) (+-cancel x x₁)
 lInv {call (plusC x) (plusC x₁)} = refl
 lInv {call (plusC x) (err x₁)} = refl
 lInv {call (plusC x) (call x₁ x₂)} = refl
@@ -147,24 +133,29 @@ rInv {call (err x) x₁} = refl
 rInv {call (call x x₂) x₁} = refl
 rInv {plusC x} = refl
 rInv {err (plusC x)} = refl
-rInv {call (plusC x) (num x₁)} = proofOfPlusC-R
+rInv {call (plusC x) (num x₁)} = cong (call (plusC x) ∘ num) (-+cancel x x₁)
 rInv {call (plusC x) (plusC x₁)} = refl
 rInv {call (plusC x) (err x₁)} = refl
 rInv {call (plusC x) (call x₁ x₂)} = refl
 
-proveLInv : Inverseˡ _≡_ _≡_ eval unEval
-proveLInv refl = lInv
+matchSetoid : Setoid lzero lzero
+matchSetoid = record
+  { Carrier = Primitive
+  ; _≈_ = _≡_
+  ; isEquivalence = record { refl = refl ; sym = sym ; trans = trans }
+  }
 
-proveRInv : Inverseʳ _≡_ _≡_ eval unEval
-proveRInv refl = rInv
-
-x : Inverse
-  (record { Carrier = Primitive ; _≈_ = _≡_ ; isEquivalence = record { refl = refl ; sym = sym ; trans = trans } })
-  (record { Carrier = Primitive ; _≈_ = _≡_ ; isEquivalence = record { refl = refl ; sym = sym ; trans = trans } })
+x : Inverse matchSetoid matchSetoid
 x = record
   { to = eval
   ; from = unEval
-  ; to-cong = proveCongruenceEval
-  ; from-cong = proveCongruenceUnEval
+  ; to-cong = cong eval
+  ; from-cong = cong unEval
   ; inverse = proveLInv , proveRInv
   }
+    where
+      proveLInv : Inverseˡ _≡_ _≡_ eval unEval
+      proveLInv refl = lInv
+
+      proveRInv : Inverseʳ _≡_ _≡_ eval unEval
+      proveRInv refl = rInv
