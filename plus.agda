@@ -168,4 +168,3 @@ x = record
   ; from-cong = proveCongruenceUnEval
   ; inverse = proveLInv , proveRInv
   }
-
