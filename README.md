@@ -4,7 +4,7 @@ This may involve:
 1. All names being linearly typed to enforce no-information-loss
 2. Some functions returning themselves to make sure their inverse can be called in any future program state.
 3. If resources get implmented, they should be linear-typed. Having everything be linear-typed might make inverting easier, since information duplicaion&deduplication becomes explicit.
-4. All functions are monadic with one inverse.
+4. All functions take one argument, and have one inverse.
 5. Higher order functions exist.
 6. Functions can only be made with other functions that return guarenteed-invertable functions, given invertable functions.
 
