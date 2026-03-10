@@ -57,8 +57,12 @@ eval ← •ReBQN evalDef← {
     ⟨'-' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1‿1≡AreNums¨ ⋄ 1‿1≡AreNums¨⟩ GECD {-} ⟩
     ⟨'⋈' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ {𝕊⟨w⋄a‿b⟩: w≡a; 0} ⟩ GECD {⋈} ⟩
     ⟨'⍟' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ AreNums⊢´ ⋄ 1 ⟩ GECD {{⇐}‿{⇐} ExtendDyadToMonad {⇐}‿{⇐}‿1‿1 GECD {⍟}˙ Mod2 ⋈} ⟩
+    ⟨'`' ⋄ {⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {𝕏`}𝕗 } ⟩
     ⟨'⁼' ⋄ {{⊢} ≡○•Type 𝕗? 𝔽⁼; ⟨ {⇐} ⋄ {⇐} ⋄ 𝕗⊸≡ ⋄ 1 ⟩ GenErrorCheckedMona {𝕏⁼}𝕗 } ⟩
-    ⟨'∘' ⋄ ∘ ⟩
+    ⟨'⥊' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {⥊} ⟩ # Perfect reshape
+    ⟨'/' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {/} ⟩ # Replicate
+    ⟨'<' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GenErrorCheckedMona {⋈} ⟩ # Replicate
+    ⟨'⍪' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ {2≡≠𝕩} ⋄ 1 ⟩ GenErrorCheckedMona {{𝕊⁼𝕩: 1(⋈⁼∘↑⋈↓)𝕩 ;𝕊𝕩:⋈⊸∾´𝕩}} ⟩
   ⟩
   primitives∾↩⟨
     ⟨'%',"Didn't match"!≡⟩
@@ -102,7 +106,13 @@ eval ← •ReBQN evalDef← {
   3%({+}⍟0) ({+}⍟0)⁼ 3
   3%({+}⍟0)⁼ ({+}⍟0)⁼⁼ 3
   9%2({+}⍟3)⁼⁼ 3
+  ⟨3⋄3⋈3‿4⟩% 3 ({⋈}⍟3)⁼⁼ 4
 
+  #width=2=1-1 * height=3
+  6% 3({+}⍟1)⁼⁼ 3
+  ⟨4⋄8⋄12⟩% 3(0+`/)<4
+
+  ⍪2⋈⍪⟨1⋄ ⟨⟩⟩
 "
   #(+2)⁼∘((+2)⁼)
 
