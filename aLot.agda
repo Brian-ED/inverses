@@ -1,4 +1,4 @@
-module plus where
+module aLot where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
 open import Function.Indexed.Relation.Binary.Equality using (≡-setoid)

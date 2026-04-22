@@ -7,7 +7,3 @@ This may involve:
 4. All functions take one argument, and have one inverse.
 5. Higher order functions exist.
 6. Functions can only be made with other functions that return guarenteed-invertable functions, given invertable functions.
-
-The proofs made here are heavily inspired by Hans Hüttel's book "Transitions And Trees". I've translated some of [his book into Agda](https://github.com/Brian-ED/transition-and-trees/edit/master/README.md).
-
-Current progress is in `./plus.agda`, it has a transition function from one state to another that is proven to be invertable. The only features it has is plus-by-constant, function calling, and error values. You cannot call inverses of functions.
