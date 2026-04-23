@@ -10,19 +10,16 @@ _≠_ : Bool → Bool → Bool
 false ≠ x = x
 true ≠ x = not x
 
-xor : Bool × Bool → Bool × Bool
-xor (fst , snd) = fst , (fst ≠ snd)
+xorInv : ∀ curry → ∀ {x} → curry ≠ (curry ≠ x) ≡ x
+xorInv false {false} = refl
+xorInv false {true} = refl
+xorInv true {false} = refl
+xorInv true {true} = refl
 
-xorInv : ∀ {x} → xor (xor x) ≡ x
-xorInv {false , false} = refl
-xorInv {false , true} = refl
-xorInv {true , false} = refl
-xorInv {true , true} = refl
-
-areInv : Inverse (setoid (Bool × Bool)) (setoid (Bool × Bool))
-areInv .Inverse.to = xor
-areInv .Inverse.from = xor
-areInv .Inverse.to-cong = cong xor
-areInv .Inverse.from-cong = cong xor
-areInv .Inverse.inverse .proj₁ refl = xorInv
-areInv .Inverse.inverse .proj₂ refl = xorInv
+areInv : ∀ curry → Inverse (setoid Bool) (setoid Bool)
+areInv curry .Inverse.to = curry ≠_
+areInv curry .Inverse.from = curry ≠_
+areInv curry .Inverse.to-cong = cong (curry ≠_)
+areInv curry .Inverse.from-cong = cong (curry ≠_)
+areInv curry .Inverse.inverse .proj₁ refl = xorInv curry
+areInv curry .Inverse.inverse .proj₂ refl = xorInv curry
