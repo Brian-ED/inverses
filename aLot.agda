@@ -19,53 +19,23 @@ zero = Data.Rational.mkℚ (ℤ.pos 0) 0 (coprime-/gcd 0 1)
 
 data Primitive : Set where
   num : ℚ → Primitive
---  plus : Primitive
   plusC : ℚ → Primitive
---  inv : Primitive → Primitive
   err : Primitive → Primitive
   call : Primitive → Primitive → Primitive
 
 eval : Primitive → Primitive
-eval (call (num x) snd) = err (call (num x) snd)
 eval (call (plusC x) (num x₁)) = call (plusC x) (num (x₁ + x))
-eval (call (plusC x) (plusC x₁)) = err (call (plusC x) (plusC x₁))
-eval (call (plusC x) (err snd)) = err (call (plusC x) (err snd))
-eval (call (plusC x) (call snd snd₁)) = err (call (plusC x) (call snd snd₁))
-eval (call (err x) snd) = err (call (err x) snd)
-eval (call (call x x₁) snd) = err (call (call x x₁) snd)
-eval (num x) = err (num x)
-eval (err (num x)) = num x
 eval (err (err x)) = err (err x)
-eval (err (call (num x) x₁)) = call (num x) x₁
 eval (err (call (plusC x) (num x₁))) = err (call (plusC x) (num x₁))
-eval (err (call (plusC x) (plusC x₁))) = call (plusC x) (plusC x₁)
-eval (err (call (plusC x) (err x₁))) = call (plusC x) (err x₁)
-eval (err (call (plusC x) (call x₁ x₂))) = call (plusC x) (call x₁ x₂)
-eval (err (call (err x) x₁)) = call (err x) x₁
-eval (err (call (call x x₂) x₁)) = call (call x x₂) x₁
-eval (plusC x) = err (plusC x)
-eval (err (plusC x)) = plusC x
+eval (err x) = x
+eval x = err x
 
 unEval : Primitive → Primitive
-unEval (num x) = err (num x)
-unEval (err (num x)) = num x
-unEval (err (err x)) = err (err x)
-unEval (err (call (num x) x₁)) = call (num x) x₁
-unEval (err (call (plusC x) (num x₁))) = err (call (plusC x) (num x₁))
-unEval (err (call (plusC x) (plusC x₁))) = call (plusC x) (plusC x₁)
-unEval (err (call (plusC x) (err x₁))) = call (plusC x) (err x₁)
-unEval (err (call (plusC x) (call x₁ x₂))) = (call (plusC x) (call x₁ x₂))
-unEval (err (call (err x) x₁)) = call (err x) x₁
-unEval (err (call (call x x₂) x₁)) = call (call x x₂) x₁
-unEval (call (num x) x₁) = err (call (num x) x₁)
 unEval (call (plusC x) (num x₁)) = call (plusC x) (num (x₁ - x))
-unEval (call (plusC x) (plusC x₁)) = err (call (plusC x) (plusC x₁))
-unEval (call (plusC x) (err x₁)) = err (call (plusC x) (err x₁))
-unEval (call (plusC x) (call x₁ x₂)) = err (call (plusC x) (call x₁ x₂))
-unEval (call (err x) x₁) = err (call (err x) x₁)
-unEval (call (call x x₂) x₁) = err (call (call x x₂) x₁)
-unEval (plusC x) = err (plusC x)
-unEval (err (plusC x)) = plusC x
+unEval (err (err x)) = err (err x)
+unEval (err (call (plusC x) (num x₁))) = err (call (plusC x) (num x₁))
+unEval (err x) = x
+unEval x = err x
 
 infixr 2 _≡⟨_⟩_
 
