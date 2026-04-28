@@ -197,16 +197,16 @@ module + where
   +˙ (int i₁ L.∷ int i₂ L.∷ s , l) = int (i₁ ℤ.+ i₂) L.∷ int i₂ L.∷ s , l
   +˙ (error (enum 0) (error (enum 0) x) L.∷ s , l) = error (enum 0) (error (enum 0) x) L.∷ s , l
   +˙ (error (enum 0) (int i₁) L.∷ int i₂ L.∷ s , l) = error (enum 0) (int i₁) L.∷ int i₂ L.∷ s , l
-  +˙ (error (enum 0) v₁ L.∷ v₂ L.∷ s , l) = v₁ L.∷ v₂ L.∷ s , l
-  +˙ (v₁ L.∷ v₂ L.∷ s , l) = error (enum 0) v₁ L.∷ v₂ L.∷ s , l
+  +˙ (error (enum 0) v₁ L.∷ s , l) = v₁ L.∷ s , l
+  +˙ (v₁ L.∷ s , l) = error (enum 0) v₁ L.∷ s , l
 
   +⁼ : (s : Stack 2) → Stack 2
   +⁼ (x L.∷ L.[] , ℕ.s≤s ())
   +⁼ (int i₁ L.∷ int i₂ L.∷ s , l) = int (i₁ ℤ.- i₂) L.∷ int i₂ L.∷ s , l
   +⁼ (error (enum 0) (error (enum 0) x) L.∷ s , l) = error (enum 0) (error (enum 0) x) L.∷ s , l
   +⁼ (error (enum 0) (int i₁) L.∷ int i₂ L.∷ s , l) = error (enum 0) (int i₁) L.∷ int i₂ L.∷ s , l
-  +⁼ (error (enum 0) v₁ L.∷ v₂ L.∷ s , l) = v₁ L.∷ v₂ L.∷ s , l
-  +⁼ (v₁ L.∷ v₂ L.∷ s , l) = error (enum 0) v₁ L.∷ v₂ L.∷ s , l
+  +⁼ (error (enum 0) v₁ L.∷ s , l) = v₁ L.∷ s , l
+  +⁼ (v₁ L.∷ s , l) = error (enum 0) v₁ L.∷ s , l
 
   +invʳ : ∀ {x} → +˙ (+⁼ x) ≡ x
   +invʳ {x L.∷ L.[] , ℕ.s≤s ()}
