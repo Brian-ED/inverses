@@ -12,14 +12,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; sym; refl; cong;
 open import Relation.Binary using (Setoid)
 open import Function using (Inverse)
 open import Data.Bool using (Bool; true; false; not; _∧_; if_then_else_; T)
-open import Data.Product using (proj₁; proj₂; _×_)
-open import Relation.Nullary using (¬_; map′)
+open import Data.Product using (proj₁; proj₂; _×_; ∃; _,_)
+open import Relation.Nullary using (Dec; yes; no; ¬_; map′)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
-open import Relation.Nullary.Decidable using (no; yes)
-
-open import Relation.Nullary using (Dec; yes; no)
-open import Relation.Binary using (DecidableEquality)
+open import Relation.Nullary.Decidable using (no; yes; ⌊_⌋)
 
 module Core.Value where
 
@@ -110,3 +107,19 @@ _≟ˡ_ (x L.∷ xs) (y L.∷ ys) with x ≟ᵛ y | xs ≟ˡ ys
 ... | yes p | yes q = yes (cong₂ L._∷_ p q)
 ... | no  p | _     = no  (λ { refl → p refl })
 ... | _     | no  q = no  (λ { refl → q refl })
+
+_==ᵛ_ : Value → Value → Bool
+x ==ᵛ y = ⌊ x ≟ᵛ y ⌋
+
+==ᵛ⇒≡ : ∀ m n → T ⌊ m ≟ᵛ n ⌋ → m ≡ n
+==ᵛ⇒≡ m n p with m ≟ᵛ n
+... | yes q = q
+... | no  q = ⊥-elim p
+
+==ᵛ-sound : ∀ m n → (m ==ᵛ n) ≡ true → m ≡ n
+==ᵛ-sound m n x = ==ᵛ⇒≡ m n (subst T (sym x) tt)
+
+notReflLemmaᵛ : ∀ x y → ¬ x ≡ y → (x ==ᵛ y) ≡ false
+notReflLemmaᵛ x y x≢y with x ==ᵛ y | inspect (x ==ᵛ_) y
+... | false | _      = refl
+... | true  | [ eq ] = ⊥-elim (x≢y (==ᵛ-sound x y eq))
