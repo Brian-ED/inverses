@@ -145,6 +145,13 @@ module nArg where
       invʳ {list li            V.∷ x V.∷ s} rewrite reflLemma errO = refl
       invʳ {string str         V.∷ x V.∷ s} rewrite reflLemma errO = refl
       invʳ {function args stmt V.∷ x V.∷ s} rewrite reflLemma errO = refl
+
+      invʳ {int i  V.∷ list li            V.∷ s} rewrite reflLemma errO = refl
+      invʳ {int i  V.∷ string str         V.∷ s} rewrite reflLemma errO = refl
+      invʳ {int i  V.∷ function args stmt V.∷ s} rewrite reflLemma errO = refl
+      invʳ {int i  V.∷ error t x          V.∷ s} rewrite reflLemma errO = refl
+      invʳ {int i₁ V.∷ int i₂             V.∷ s} rewrite f-invʳ i₂ i₁  = refl
+
       invʳ {error (enum n) (list li) V.∷ x₁ V.∷ s} with n ℕ.≟ errO
       ... | no q rewrite notReflLemma n errO q rewrite reflLemma errO rewrite notReflLemma n errO q = refl
       ... | yes q rewrite q rewrite reflLemma errO = refl
@@ -176,12 +183,6 @@ module nArg where
       ...   | function args stmt rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
       ...   | error t z          rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
 
-      invʳ {int i V.∷ list li V.∷ s} rewrite reflLemma errO = refl
-      invʳ {int i₁ V.∷ int i₂ V.∷ s} rewrite f-invʳ i₂ i₁  = refl
-      invʳ {int i V.∷ string str V.∷ s} rewrite reflLemma errO = refl
-      invʳ {int i V.∷ function args stmt V.∷ s} rewrite reflLemma errO = refl
-      invʳ {int i V.∷ error t x V.∷ s} rewrite reflLemma errO = refl
-
       invʳ {error (enum n) (int i) V.∷ x V.∷ s} with n ℕ.≟ errO
       ... | yes p rewrite p with x
       ...   | list li            rewrite reflLemma errO = refl
@@ -201,6 +202,13 @@ module nArg where
       invˡ {list li            V.∷ x V.∷ s} rewrite reflLemma errO = refl
       invˡ {string str         V.∷ x V.∷ s} rewrite reflLemma errO = refl
       invˡ {function args stmt V.∷ x V.∷ s} rewrite reflLemma errO = refl
+
+      invˡ {int i V.∷ list li V.∷ s} rewrite reflLemma errO = refl
+      invˡ {int i₁ V.∷ int i₂ V.∷ s} rewrite f-invˡ i₂ i₁  = refl
+      invˡ {int i V.∷ string str V.∷ s} rewrite reflLemma errO = refl
+      invˡ {int i V.∷ function args stmt V.∷ s} rewrite reflLemma errO = refl
+      invˡ {int i V.∷ error t x V.∷ s} rewrite reflLemma errO = refl
+
       invˡ {error (enum n) (list li) V.∷ x₁ V.∷ s} with n ℕ.≟ errO
       ... | no q rewrite notReflLemma n errO q rewrite reflLemma errO rewrite notReflLemma n errO q = refl
       ... | yes q rewrite q rewrite reflLemma errO = refl
@@ -231,12 +239,6 @@ module nArg where
       ...   | string str         rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
       ...   | function args stmt rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
       ...   | error t z          rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
-
-      invˡ {int i V.∷ list li V.∷ s} rewrite reflLemma errO = refl
-      invˡ {int i₁ V.∷ int i₂ V.∷ s} rewrite f-invˡ i₂ i₁  = refl
-      invˡ {int i V.∷ string str V.∷ s} rewrite reflLemma errO = refl
-      invˡ {int i V.∷ function args stmt V.∷ s} rewrite reflLemma errO = refl
-      invˡ {int i V.∷ error t x V.∷ s} rewrite reflLemma errO = refl
 
       invˡ {error (enum n) (int i) V.∷ x V.∷ s} with n ℕ.≟ errO
       ... | yes p rewrite p with x
