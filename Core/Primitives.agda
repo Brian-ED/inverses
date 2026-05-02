@@ -122,7 +122,6 @@ module nArg where
         else error (enum errO) (error (enum n) v₁) V.∷ v₂ V.∷ s
       f˙´ (v₁ V.∷ v₂ V.∷ s) = error (enum errO) v₁ V.∷ v₂ V.∷ s
 
-
       f⁼´ : (s : Stack 2) → Stack 2
       f⁼´ (int i₁ V.∷ int i₂ V.∷ s) = int (f⁼ i₂ i₁) V.∷ int i₂ V.∷ s
       f⁼´ (error (enum n₁) (error (enum n₂) x) V.∷ s) =
@@ -301,8 +300,7 @@ module nArg where
 
 module + where
 
-  _-˜_ : ℤ.ℤ → ℤ.ℤ → ℤ.ℤ
-  _-˜_ x y = y ℤ.- x
+  _-˜_ = λ x y → y ℤ.- x
 
   l : (x y : ℤ.ℤ) → x -˜ (x ℤ.+ y) ≡ y
   l x y = trans (cong (ℤ._+ (ℤ.- x)) (ℤp.+-comm x y))
