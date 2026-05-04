@@ -116,6 +116,11 @@ x ==ᵛ y = ⌊ x ≟ᵛ y ⌋
 ... | yes q = q
 ... | no  q = ⊥-elim p
 
+≡⇒==ᵛ : ∀ m n → m ≡ n → T ⌊ m ≟ᵛ n ⌋
+≡⇒==ᵛ m n refl with m ≟ᵛ n
+... | yes _ = tt
+... | no  q = q refl
+
 ==ᵛ-sound : ∀ m n → (m ==ᵛ n) ≡ true → m ≡ n
 ==ᵛ-sound m n x = ==ᵛ⇒≡ m n (subst T (sym x) tt)
 
