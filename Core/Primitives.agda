@@ -163,7 +163,7 @@ module nArg where
       ... | yes q rewrite q rewrite reflLemma errO = refl
 
       invʳ {error (enum n₁) (error (enum n₂) x₁) V.∷ x₂ V.∷ s} with n₁ ℕ.≟ errO | n₂ ℕ.≟ errO
-      ... | yes p | yes q rewrite p rewrite reflLemma errO rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
+      ... | yes p | yes q rewrite p rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
       ... | yes p | no q rewrite p rewrite reflLemma errO rewrite notReflLemma n₂ errO q with x₁
       ...   | list li            rewrite notReflLemma n₂ errO q = refl
       ...   | string str         rewrite notReflLemma n₂ errO q = refl
@@ -220,7 +220,7 @@ module nArg where
       ... | yes q rewrite q rewrite reflLemma errO = refl
 
       invˡ {error (enum n₁) (error (enum n₂) x₁) V.∷ x₂ V.∷ s} with n₁ ℕ.≟ errO | n₂ ℕ.≟ errO
-      ... | yes p | yes q rewrite p rewrite reflLemma errO rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
+      ... | yes p | yes q rewrite p rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
       ... | yes p | no q rewrite p rewrite reflLemma errO rewrite notReflLemma n₂ errO q with x₁
       ...   | list li            rewrite notReflLemma n₂ errO q = refl
       ...   | string str         rewrite notReflLemma n₂ errO q = refl
