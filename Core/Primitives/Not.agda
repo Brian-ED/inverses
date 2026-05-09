@@ -1,4 +1,4 @@
-module Primitives.Not where
+module Core.Primitives.Not where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
 open import Relation.Binary using (Setoid)
