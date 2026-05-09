@@ -20,11 +20,16 @@ open import Relation.Nullary.Decidable using (no; yes; ⌊_⌋)
 
 module Core.Value where
 
+infixr 4 _≟ˡ_
+infixr 4 _≟ᵛ_
+infixr 4 _≟ˡˢ_
+
 data Statement : Set where
   xxx : Statement
 
 data errType : Set where
-  enum : (n : ℕ.ℕ) → errType
+  enum˙ : (n : ℕ.ℕ) → errType
+  enum⁼ : (n : ℕ.ℕ) → errType
 
 data Value : Set where
   list : (li : L.List Value) → Value
@@ -33,80 +38,97 @@ data Value : Set where
   function : (args : L.List S.String) → (stmt : Statement) → Value
   error : (t : errType) → (arg : Value) → Value
 
+_≟ᵉ_ : DecidableEquality errType
+enum˙ n₁ ≟ᵉ enum˙ n₂ with n₁ ℕ.≟ n₂
+... | yes p = yes (cong enum˙ p)
+... | no  p = no λ { refl → p refl }
+enum˙ n₁ ≟ᵉ enum⁼ n₂ = no λ ()
+enum⁼ n₁ ≟ᵉ enum˙ n₂ = no λ ()
+enum⁼ n₁ ≟ᵉ enum⁼ n₂ with n₁ ℕ.≟ n₂
+... | yes p = yes (cong enum⁼ p)
+... | no  p = no λ { refl → p refl }
+
 _≟ˡˢ_ : DecidableEquality (L.List S.String)
-_≟ˡˢ_ L.[] L.[] = yes refl
-_≟ˡˢ_ (x L.∷ xs) (y L.∷ ys) with x S.≟ y | xs ≟ˡˢ ys
+L.[] ≟ˡˢ L.[] = yes refl
+x L.∷ xs ≟ˡˢ y L.∷ ys with x S.≟ y | xs ≟ˡˢ ys
 ... | yes p | yes q = yes (cong₂ L._∷_ p q)
-... | _ | no q = no (λ { refl → q refl })
-... | no p | _ = no (λ { refl → p refl })
-_≟ˡˢ_ L.[] (x L.∷ y) = no (λ ())
-_≟ˡˢ_ (x L.∷ x₁) L.[] = no (λ ())
+... | _ | no q = no λ { refl → q refl }
+... | no p | _ = no λ { refl → p refl }
+L.[] ≟ˡˢ x L.∷ y = no λ ()
+x L.∷ x₁ ≟ˡˢ L.[] = no λ ()
 
 _≟ˢᵗ_ : DecidableEquality Statement
-_≟ˢᵗ_ xxx xxx = yes refl
+xxx ≟ˢᵗ xxx = yes refl
 
 
 _≟ᵛ_ : DecidableEquality Value
 _≟ˡ_ : DecidableEquality (L.List Value)
 
-int (ℤ.+ n) ≟ᵛ int (ℤ.+ n₂)    with n ℕ.≟ n₂
+int (ℤ.+ n) ≟ᵛ int (ℤ.+ n₂) with n ℕ.≟ n₂
 ... | yes p = yes (cong int (cong ℤ.+_ p))
-... | no  p = no  (λ { refl → p refl })
+... | no  p = no λ { refl → p refl }
 
-int (ℤ.+ _) ≟ᵛ int ℤ.-[1+ _ ] = no (λ ())
+int (ℤ.+ _) ≟ᵛ int ℤ.-[1+ _ ] = no λ ()
 
-_≟ᵛ_ (list xs) (list ys) with _≟ˡ_ xs ys
+list xs ≟ᵛ list ys with _≟ˡ_ xs ys
 ... | yes p = yes (cong list p)
-... | no  p = no  (λ { refl → p refl })
+... | no  p = no λ { refl → p refl }
 
-_≟ᵛ_ (error (enum n₁) v₁) (error (enum n₂) v₂) with n₁ ℕ.≟ n₂ | v₁ ≟ᵛ v₂
-... | yes p | yes q = yes (cong₂ error (cong enum p) q)
-... | no  p | _     = no  (λ { refl → p refl })
-... | _     | no  q = no  (λ { refl → q refl })
+error (enum⁼ n₁) v₁ ≟ᵛ error (enum⁼ n₂) v₂ with n₁ ℕ.≟ n₂ | v₁ ≟ᵛ v₂
+... | yes p | yes q = yes (cong₂ error (cong enum⁼ p) q)
+... | no  p | _     = no λ { refl → p refl }
+... | _     | no  q = no λ { refl → q refl }
 
-_≟ᵛ_ (int (ℤ.-[1+_] n₁)) (int (ℤ.-[1+_] n₂)) with n₁ ℕ.≟ n₂
+error (enum˙ n₁) v₁ ≟ᵛ error (enum˙ n₂) v₂ with n₁ ℕ.≟ n₂ | v₁ ≟ᵛ v₂
+... | yes p | yes q = yes (cong₂ error (cong enum˙ p) q)
+... | no  p | _     = no λ { refl → p refl }
+... | _     | no  q = no λ { refl → q refl }
+
+int (ℤ.-[1+_] n₁) ≟ᵛ int (ℤ.-[1+_] n₂) with n₁ ℕ.≟ n₂
 ... | yes p = yes (cong int (cong ℤ.-[1+_] p))
-... | no  p = no  (λ { refl → p refl })
+... | no  p = no λ { refl → p refl }
 
-_≟ᵛ_ (string str₁) (string str₂) with str₁ S.≟ str₂
+string str₁ ≟ᵛ string str₂ with str₁ S.≟ str₂
 ... | yes p = yes (cong string p)
-... | no  p = no  (λ { refl → p refl })
+... | no  p = no λ { refl → p refl }
 
-_≟ᵛ_ (function args₁ stmt₁) (function args₂ stmt₂) with args₁ ≟ˡˢ args₂ | stmt₁ ≟ˢᵗ stmt₂
+function args₁ stmt₁ ≟ᵛ function args₂ stmt₂ with args₁ ≟ˡˢ args₂ | stmt₁ ≟ˢᵗ stmt₂
 ... | yes p | yes q = yes (cong₂ function p q)
-... | no  p | _     = no  (λ { refl → p refl })
-... | _     | no  q = no  (λ { refl → q refl })
+... | no  p | _     = no λ { refl → p refl }
+... | _     | no  q = no λ { refl → q refl }
 
 -- all cross-constructor cases
-_≟ᵛ_ (int _)           (list _)          = no (λ ())
-_≟ᵛ_ (string _)        (list _)          = no (λ ())
-_≟ᵛ_ (function _ _)    (list _)          = no (λ ())
-_≟ᵛ_ (error _ _)       (list _)          = no (λ ())
-_≟ᵛ_ (list _)          (int _)           = no (λ ())
-_≟ᵛ_ (int ℤ.-[1+ _ ])  (int (ℤ.+ _))    = no (λ ())
-_≟ᵛ_ (string _)        (int _)           = no (λ ())
-_≟ᵛ_ (function _ _)    (int _)           = no (λ ())
-_≟ᵛ_ (error _ _)       (int _)           = no (λ ())
-_≟ᵛ_ (list _)          (string _)        = no (λ ())
-_≟ᵛ_ (int _)           (string _)        = no (λ ())
-_≟ᵛ_ (function _ _)    (string _)        = no (λ ())
-_≟ᵛ_ (error _ _)       (string _)        = no (λ ())
-_≟ᵛ_ (list _)          (function _ _)    = no (λ ())
-_≟ᵛ_ (int _)           (function _ _)    = no (λ ())
-_≟ᵛ_ (string _)        (function _ _)    = no (λ ())
-_≟ᵛ_ (error _ _)       (function _ _)    = no (λ ())
-_≟ᵛ_ (list _)          (error _ _)       = no (λ ())
-_≟ᵛ_ (int _)           (error _ _)       = no (λ ())
-_≟ᵛ_ (string _)        (error _ _)       = no (λ ())
-_≟ᵛ_ (function _ _)    (error _ _)       = no (λ ())
+int _             ≟ᵛ list _            = no λ ()
+string _          ≟ᵛ list _            = no λ ()
+function _ _      ≟ᵛ list _            = no λ ()
+error _ _         ≟ᵛ list _            = no λ ()
+list _            ≟ᵛ int _             = no λ ()
+int ℤ.-[1+ _ ]    ≟ᵛ int (ℤ.+ _)       = no λ ()
+string _          ≟ᵛ int _             = no λ ()
+function _ _      ≟ᵛ int _             = no λ ()
+error _ _         ≟ᵛ int _             = no λ ()
+list _            ≟ᵛ string _          = no λ ()
+int _             ≟ᵛ string _          = no λ ()
+function _ _      ≟ᵛ string _          = no λ ()
+error _ _         ≟ᵛ string _          = no λ ()
+list _            ≟ᵛ function _ _      = no λ ()
+int _             ≟ᵛ function _ _      = no λ ()
+string _          ≟ᵛ function _ _      = no λ ()
+error _ _         ≟ᵛ function _ _      = no λ ()
+list _            ≟ᵛ error _ _         = no λ ()
+int _             ≟ᵛ error _ _         = no λ ()
+string _          ≟ᵛ error _ _         = no λ ()
+function _ _      ≟ᵛ error _ _         = no λ ()
+error (enum˙ _) _ ≟ᵛ error (enum⁼ _) _ = no λ ()
+error (enum⁼ _) _ ≟ᵛ error (enum˙ _) _ = no λ ()
 
-_≟ˡ_ L.[] L.[] = yes refl
-_≟ˡ_ L.[] (_ L.∷ _) = no (λ ())
-_≟ˡ_ (_ L.∷ _) L.[] = no (λ ())
-_≟ˡ_ (x L.∷ xs) (y L.∷ ys) with x ≟ᵛ y | xs ≟ˡ ys
+L.[]     ≟ˡ L.[]    = yes refl
+L.[]     ≟ˡ _ L.∷ _ = no λ ()
+_ L.∷ _  ≟ˡ L.[]    = no λ ()
+x L.∷ xs ≟ˡ y L.∷ ys with x ≟ᵛ y | xs ≟ˡ ys
 ... | yes p | yes q = yes (cong₂ L._∷_ p q)
-... | no  p | _     = no  (λ { refl → p refl })
-... | _     | no  q = no  (λ { refl → q refl })
+... | no  p | _     = no λ { refl → p refl }
+... | _     | no  q = no λ { refl → q refl }
 
 _==ᵛ_ : Value → Value → Bool
 x ==ᵛ y = ⌊ x ≟ᵛ y ⌋

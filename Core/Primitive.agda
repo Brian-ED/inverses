@@ -42,11 +42,11 @@ record Primitive (n m : ℕ.ℕ) : Set where
   inv .Inverse.inverse .proj₂ refl = f-invˡ
 
 incrErrorUnit : (v : Value) → Value
-incrErrorUnit (error (enum n) x) = error (enum (ℕ.suc n)) (incrErrorUnit x)
+incrErrorUnit (error (enum˙ n) x) = error (enum˙ (ℕ.suc n)) (incrErrorUnit x)
 incrErrorUnit x = x
 
 decrErrorUnit : (v : Value) → Value
-decrErrorUnit (error (enum (ℕ.suc n)) x) = error (enum n) (decrErrorUnit x)
+decrErrorUnit (error (enum˙ (ℕ.suc n)) x) = error (enum˙ n) (decrErrorUnit x)
 decrErrorUnit x = x
 
 incrInvUnit : ∀ x → decrErrorUnit (incrErrorUnit x) ≡ x
@@ -54,15 +54,16 @@ incrInvUnit (list li) = refl
 incrInvUnit (int i) = refl
 incrInvUnit (string str) = refl
 incrInvUnit (function args stmt) = refl
-incrInvUnit (error (enum n) x) rewrite incrInvUnit x = refl
+incrInvUnit (error (enum˙ n) x) rewrite incrInvUnit x = refl
+incrInvUnit (error (enum⁼ n) x) = refl
 
 incrError : (s : Stack 2) → Stack 2
-incrError ((error (enum n) x) V.∷ s) = (incrErrorUnit (error (enum n) x)) V.∷ s
+incrError ((error (enum˙ n) x) V.∷ s) = (incrErrorUnit (error (enum˙ n) x)) V.∷ s
 incrError x = x
 
 
 decrError : (s : Stack 2) → Stack 2
-decrError ((error (enum n) x) V.∷ s) = (decrErrorUnit (error (enum n) x)) V.∷ s
+decrError ((error (enum˙ n) x) V.∷ s) = (decrErrorUnit (error (enum˙ n) x)) V.∷ s
 decrError x = x
 
 incrInv : ∀ x → decrError (incrError x) ≡ x
@@ -70,7 +71,8 @@ incrInv (list li V.∷ fst) = refl
 incrInv (int i V.∷ fst) = refl
 incrInv (string str V.∷ fst) = refl
 incrInv (function args stmt V.∷ fst) = refl
-incrInv (error (enum n) x V.∷ fst) rewrite incrInvUnit x = refl
+incrInv (error (enum˙ n) x V.∷ fst) rewrite incrInvUnit x = refl
+incrInv (error (enum⁼ n) x V.∷ x₁) = refl
 
 impossible : ⊥ → false ≡ true
 impossible ()
