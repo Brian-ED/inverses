@@ -3,6 +3,7 @@ import Data.Integer.Properties as ℤp
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕp
 import Data.Nat.ListAction as ℕL
+import Data.Bool.Properties as Bp
 import Data.Bool.ListAction as BL
 import Data.List as L
 import Data.Vec as V
@@ -21,7 +22,16 @@ open import Relation.Nullary.Decidable using (no; yes)
 open import Core.Value
 open import Core.Primitive
 
+import Function as F
+
 module Core.DyadInt where
+
+≡ᵇt→≡ : ∀ n m → (n ℕ.≡ᵇ m) ≡ true → n ≡ m
+≡ᵇt→≡ n m x = ℕp.≡ᵇ⇒≡ n m ((Bp.T-≡ {n ℕ.≡ᵇ m} .F.Equivalence.from) x)
+
+≡ᵇf→≡ : ∀ n m → (n ℕ.≡ᵇ m) ≡ false → ¬ n ≡ m
+≡ᵇf→≡ (ℕ.suc n) (ℕ.suc m) x refl = ≡ᵇf→≡ n m x refl
+
 
 intFuncToPrim : (f˙ f⁼ : ℤ.ℤ → ℤ.ℤ → ℤ.ℤ)
               → (f-invʳ : ∀ x y → f˙ x (f⁼ x y) ≡ y)
@@ -88,35 +98,31 @@ intFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     invʳ {int i₁ V.∷ int i₂ V.∷ V.[]} rewrite f-invʳ i₂ i₁ = refl
     invʳ {int i V.∷ error (enum˙ n) x₁ V.∷ V.[]} rewrite reflLemma errO = refl
     invʳ {int i V.∷ error (enum⁼ n) x₁ V.∷ V.[]} rewrite reflLemma errO = refl
-    invʳ {error (enum˙ n) (list li) V.∷ x₂ V.∷ V.[]} with n ℕ.≟ errO
-    ... | yes p rewrite p rewrite reflLemma errO = refl
-    ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
-    invʳ {error (enum˙ n) (string str) V.∷ x₂ V.∷ V.[]} with n ℕ.≟ errO
-    ... | yes p rewrite p rewrite reflLemma errO = refl
-    ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
-    invʳ {error (enum˙ n) (function args stmt) V.∷ x₂ V.∷ V.[]} with n ℕ.≟ errO
-    ... | yes p rewrite p rewrite reflLemma errO = refl
-    ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
-    invʳ {error (enum˙ n) (error (enum˙ n₁) x₁) V.∷ x₂ V.∷ V.[]} with n ℕ.≟ errO
-    ... | yes p rewrite p rewrite reflLemma errO = refl
-    ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
-    invʳ {error (enum˙ n₁) (error (enum⁼ n₂) x₁) V.∷ x₂ V.∷ V.[]} with n₁ ℕ.≟ errO
-    ... | no p rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
-    ... | yes p rewrite p rewrite reflLemma errO with n₂ ℕ.≟ errO
-    ... | yes q rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
-    ... | no q rewrite notReflLemma n₂ errO q with x₁
-    ... | list li rewrite notReflLemma n₂ errO q = refl
-    ... | string str rewrite notReflLemma n₂ errO q = refl
-    ... | function args stmt rewrite notReflLemma n₂ errO q = refl
-    ... | error (enum˙ t₁) x₃ rewrite notReflLemma n₂ errO q = refl
-    ... | error (enum⁼ t₁) x₃ rewrite notReflLemma n₂ errO q = refl
-    ... | int i with x₂
-    ... |   list li rewrite notReflLemma n₂ errO q = refl
-    ... |   int i₁ rewrite notReflLemma n₂ errO q = refl
-    ... |   string str rewrite notReflLemma n₂ errO q = refl
-    ... |   function args stmt rewrite notReflLemma n₂ errO q = refl
-    ... |   error (enum˙ t) v rewrite notReflLemma n₂ errO q = refl
-    ... |   error (enum⁼ t) v rewrite notReflLemma n₂ errO q = refl
+    invʳ {error (enum˙ n) (list li) V.∷ x₂ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
+    ... | true rewrite ≡ᵇt→≡ n errO p = refl
+    ... | false rewrite reflLemma errO rewrite p = refl
+    invʳ {error (enum˙ n) (string str) V.∷ x₂ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
+    ... | true rewrite ≡ᵇt→≡ n errO p = refl
+    ... | false rewrite reflLemma errO rewrite p = refl
+    invʳ {error (enum˙ n) (function args stmt) V.∷ x₂ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
+    ... | true rewrite ≡ᵇt→≡ n errO p = refl
+    ... | false rewrite reflLemma errO rewrite p = refl
+    invʳ {error (enum˙ n) (error (enum˙ n₁) x₁) V.∷ x₂ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
+    ... | true rewrite ≡ᵇt→≡ n errO p = refl
+    ... | false rewrite reflLemma errO rewrite p = refl
+    invʳ {error (enum˙ n₁) (error (enum⁼ n₂) x₁) V.∷ x₂ V.∷ V.[]} with n₁ ℕ.≡ᵇ errO in p | n₂ ℕ.≡ᵇ errO in q | x₁ | x₂
+    ... | false | B | a | b rewrite reflLemma errO rewrite p = refl
+    ... | true | true | a | b rewrite ≡ᵇt→≡ n₁ errO p rewrite ≡ᵇt→≡ n₂ errO q rewrite reflLemma errO = refl
+    ... | true | false | list li | n rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | string str | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | function args stmt | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | error (enum˙ t) x | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | error (enum⁼ t) x | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | list li rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | string str rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | function args stmt rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | error t b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i₁ | int i₂ rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
     invʳ {error (enum˙ n) (int i) V.∷ list li V.∷ V.[]} with n ℕ.≟ errO
     ... | yes p rewrite p rewrite reflLemma errO = refl
     ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
@@ -139,8 +145,7 @@ intFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     invʳ {error (enum⁼ n) (int i) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
     invʳ {error (enum⁼ n) (string str) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
     invʳ {error (enum⁼ n) (function args stmt) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
-    invʳ {error (enum⁼ n) (error (enum˙ n₁) x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
-    invʳ {error (enum⁼ n) (error (enum⁼ n₁) x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
+    invʳ {error (enum⁼ n) (error n₁ x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
 
     invˡ : ∀ {x} → f⁼´ (f˙´ x) ≡ x
     invˡ {list li V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
@@ -164,23 +169,19 @@ intFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     invˡ {error (enum⁼ n) (error (enum⁼ n₁) x₁) V.∷ x₂ V.∷ V.[]} with n ℕ.≟ errO
     ... | yes p rewrite p rewrite reflLemma errO = refl
     ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
-    invˡ {error (enum⁼ n₁) (error (enum˙ n₂) x₁) V.∷ x₂ V.∷ V.[]} with n₁ ℕ.≟ errO
-    ... | no p rewrite notReflLemma n₁ errO p rewrite reflLemma errO rewrite notReflLemma n₁ errO p = refl
-    ... | yes p rewrite p rewrite reflLemma errO with n₂ ℕ.≟ errO
-    ... | yes q rewrite q rewrite reflLemma errO rewrite reflLemma errO = refl
-    ... | no q rewrite notReflLemma n₂ errO q with x₁
-    ... | list li rewrite notReflLemma n₂ errO q = refl
-    ... | string str rewrite notReflLemma n₂ errO q = refl
-    ... | function args stmt rewrite notReflLemma n₂ errO q = refl
-    ... | error (enum⁼ t₁) x₃ rewrite notReflLemma n₂ errO q = refl
-    ... | error (enum˙ t₁) x₃ rewrite notReflLemma n₂ errO q = refl
-    ... | int i with x₂
-    ... |   list li rewrite notReflLemma n₂ errO q = refl
-    ... |   int i₁ rewrite notReflLemma n₂ errO q = refl
-    ... |   string str rewrite notReflLemma n₂ errO q = refl
-    ... |   function args stmt rewrite notReflLemma n₂ errO q = refl
-    ... |   error (enum˙ t) v rewrite notReflLemma n₂ errO q = refl
-    ... |   error (enum⁼ t) v rewrite notReflLemma n₂ errO q = refl
+    invˡ {error (enum⁼ n₁) (error (enum˙ n₂) x₁) V.∷ x₂ V.∷ V.[]} with n₁ ℕ.≡ᵇ errO in p | n₂ ℕ.≡ᵇ errO in q | x₁ | x₂
+    ... | false | B | a | b rewrite reflLemma errO rewrite p = refl
+    ... | true | true | a | b rewrite ≡ᵇt→≡ n₁ errO p rewrite ≡ᵇt→≡ n₂ errO q rewrite reflLemma errO = refl
+    ... | true | false | list li | n rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | string str | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | function args stmt | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | error (enum˙ t) x | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | error (enum⁼ t) x | b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | list li rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | string str rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | function args stmt rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i | error t b rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
+    ... | true | false | int i₁ | int i₂ rewrite q rewrite ≡ᵇt→≡ n₁ errO p = refl
     invˡ {error (enum⁼ n) (int i) V.∷ list li V.∷ V.[]} with n ℕ.≟ errO
     ... | yes p rewrite p rewrite reflLemma errO = refl
     ... | no p rewrite notReflLemma n errO p rewrite reflLemma errO rewrite notReflLemma n errO p = refl
@@ -203,5 +204,4 @@ intFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     invˡ {error (enum˙ n) (int i) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
     invˡ {error (enum˙ n) (string str) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
     invˡ {error (enum˙ n) (function args stmt) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
-    invˡ {error (enum˙ n) (error (enum˙ n₁) x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
-    invˡ {error (enum˙ n) (error (enum⁼ n₁) x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
+    invˡ {error (enum˙ n) (error t x) V.∷ x₁ V.∷ V.[]} rewrite reflLemma errO = refl
