@@ -1,5 +1,5 @@
-import Data.Integer as ℤ
-import Data.Integer.Properties as ℤp
+import Data.Rational as ℚ
+import Data.Rational.Properties as ℚp
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕp
 import Data.Nat.ListAction as ℕL
@@ -33,7 +33,7 @@ data errType : Set where
 
 data Value : Set where
   list : (li : L.List Value) → Value
-  int : (i : ℤ.ℤ) → Value
+  num : (i : ℚ.ℚ) → Value
   string : (str : S.String) → Value
   function : (args : L.List S.String) → (stmt : Statement) → Value
   error : (t : errType) → (arg : Value) → Value
@@ -64,11 +64,9 @@ xxx ≟ˢᵗ xxx = yes refl
 _≟ᵛ_ : DecidableEquality Value
 _≟ˡ_ : DecidableEquality (L.List Value)
 
-int (ℤ.+ n) ≟ᵛ int (ℤ.+ n₂) with n ℕ.≟ n₂
-... | yes p = yes (cong int (cong ℤ.+_ p))
+num n ≟ᵛ num n₂ with n ℚ.≟ n₂
+... | yes p = yes (cong num p)
 ... | no  p = no λ { refl → p refl }
-
-int (ℤ.+ _) ≟ᵛ int ℤ.-[1+ _ ] = no λ ()
 
 list xs ≟ᵛ list ys with _≟ˡ_ xs ys
 ... | yes p = yes (cong list p)
@@ -84,10 +82,6 @@ error (enum˙ n₁) v₁ ≟ᵛ error (enum˙ n₂) v₂ with n₁ ℕ.≟ n₂ 
 ... | no  p | _     = no λ { refl → p refl }
 ... | _     | no  q = no λ { refl → q refl }
 
-int (ℤ.-[1+_] n₁) ≟ᵛ int (ℤ.-[1+_] n₂) with n₁ ℕ.≟ n₂
-... | yes p = yes (cong int (cong ℤ.-[1+_] p))
-... | no  p = no λ { refl → p refl }
-
 string str₁ ≟ᵛ string str₂ with str₁ S.≟ str₂
 ... | yes p = yes (cong string p)
 ... | no  p = no λ { refl → p refl }
@@ -98,25 +92,24 @@ function args₁ stmt₁ ≟ᵛ function args₂ stmt₂ with args₁ ≟ˡˢ ar
 ... | _     | no  q = no λ { refl → q refl }
 
 -- all cross-constructor cases
-int _             ≟ᵛ list _            = no λ ()
+num _             ≟ᵛ list _            = no λ ()
 string _          ≟ᵛ list _            = no λ ()
 function _ _      ≟ᵛ list _            = no λ ()
 error _ _         ≟ᵛ list _            = no λ ()
-list _            ≟ᵛ int _             = no λ ()
-int ℤ.-[1+ _ ]    ≟ᵛ int (ℤ.+ _)       = no λ ()
-string _          ≟ᵛ int _             = no λ ()
-function _ _      ≟ᵛ int _             = no λ ()
-error _ _         ≟ᵛ int _             = no λ ()
+list _            ≟ᵛ num _             = no λ ()
+string _          ≟ᵛ num _             = no λ ()
+function _ _      ≟ᵛ num _             = no λ ()
+error _ _         ≟ᵛ num _             = no λ ()
 list _            ≟ᵛ string _          = no λ ()
-int _             ≟ᵛ string _          = no λ ()
+num _             ≟ᵛ string _          = no λ ()
 function _ _      ≟ᵛ string _          = no λ ()
 error _ _         ≟ᵛ string _          = no λ ()
 list _            ≟ᵛ function _ _      = no λ ()
-int _             ≟ᵛ function _ _      = no λ ()
+num _             ≟ᵛ function _ _      = no λ ()
 string _          ≟ᵛ function _ _      = no λ ()
 error _ _         ≟ᵛ function _ _      = no λ ()
 list _            ≟ᵛ error _ _         = no λ ()
-int _             ≟ᵛ error _ _         = no λ ()
+num _             ≟ᵛ error _ _         = no λ ()
 string _          ≟ᵛ error _ _         = no λ ()
 function _ _      ≟ᵛ error _ _         = no λ ()
 error (enum˙ _) _ ≟ᵛ error (enum⁼ _) _ = no λ ()

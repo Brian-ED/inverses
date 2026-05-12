@@ -1,7 +1,5 @@
 module Core.Primitive where
 
-import Data.Integer as ℤ
-import Data.Integer.Properties as ℤp
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕp
 import Data.Nat.ListAction as ℕL
@@ -51,7 +49,7 @@ decrErrorUnit x = x
 
 incrInvUnit : ∀ x → decrErrorUnit (incrErrorUnit x) ≡ x
 incrInvUnit (list li) = refl
-incrInvUnit (int i) = refl
+incrInvUnit (num i) = refl
 incrInvUnit (string str) = refl
 incrInvUnit (function args stmt) = refl
 incrInvUnit (error (enum˙ n) x) rewrite incrInvUnit x = refl
@@ -68,7 +66,7 @@ decrError x = x
 
 incrInv : ∀ x → decrError (incrError x) ≡ x
 incrInv (list li V.∷ fst) = refl
-incrInv (int i V.∷ fst) = refl
+incrInv (num i V.∷ fst) = refl
 incrInv (string str V.∷ fst) = refl
 incrInv (function args stmt V.∷ fst) = refl
 incrInv (error (enum˙ n) x V.∷ fst) rewrite incrInvUnit x = refl
