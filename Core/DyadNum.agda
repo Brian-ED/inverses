@@ -7,6 +7,7 @@ import Data.Bool.Properties as Bp
 import Data.Bool.ListAction as BL
 import Data.List as L
 import Data.Vec as V
+
 open import Data.String using (String)
 open import Relation.Binary using (DecidableEquality)
 open import Relation.Binary.PropositionalEquality using (_≡_; sym; trans; refl; cong; setoid; inspect; [_]; subst)
@@ -24,7 +25,7 @@ open import Core.Primitive
 
 import Function as F
 
-module Core.DyadNnt where
+module Core.DyadNum where
 
 ≡ᵇt→≡ : ∀ n m → (n ℕ.≡ᵇ m) ≡ true → n ≡ m
 ≡ᵇt→≡ n m x = ℕp.≡ᵇ⇒≡ n m ((Bp.T-≡ {n ℕ.≡ᵇ m} .F.Equivalence.from) x)
