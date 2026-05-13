@@ -1,5 +1,3 @@
-module Core.Primitive where
-
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕp
 import Data.Nat.ListAction as ℕL
@@ -18,10 +16,7 @@ open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
 open import Relation.Nullary.Decidable using (no; yes)
 
-open import Core.Value
-
-Stack : ℕ.ℕ → Set
-Stack = V.Vec Value
+module Core.Primitive (Stack : ℕ.ℕ → Set) where
 
 record Primitive (n m : ℕ.ℕ) : Set where
   constructor ⟨_˙,_⁼,_ʳ,_ˡ⟩
@@ -38,53 +33,3 @@ record Primitive (n m : ℕ.ℕ) : Set where
   inv .Inverse.from-cong = cong f⁼
   inv .Inverse.inverse .proj₁ refl = f-invʳ
   inv .Inverse.inverse .proj₂ refl = f-invˡ
-
-incrErrorUnit : (v : Value) → Value
-incrErrorUnit (error (enum˙ n) x) = error (enum˙ (ℕ.suc n)) (incrErrorUnit x)
-incrErrorUnit x = x
-
-decrErrorUnit : (v : Value) → Value
-decrErrorUnit (error (enum˙ (ℕ.suc n)) x) = error (enum˙ n) (decrErrorUnit x)
-decrErrorUnit x = x
-
-incrInvUnit : ∀ x → decrErrorUnit (incrErrorUnit x) ≡ x
-incrInvUnit (list li) = refl
-incrInvUnit (num i) = refl
-incrInvUnit (string str) = refl
-incrInvUnit (function args stmt) = refl
-incrInvUnit (error (enum˙ n) x) rewrite incrInvUnit x = refl
-incrInvUnit (error (enum⁼ n) x) = refl
-
-incrError : (s : Stack 2) → Stack 2
-incrError ((error (enum˙ n) x) V.∷ s) = (incrErrorUnit (error (enum˙ n) x)) V.∷ s
-incrError x = x
-
-
-decrError : (s : Stack 2) → Stack 2
-decrError ((error (enum˙ n) x) V.∷ s) = (decrErrorUnit (error (enum˙ n) x)) V.∷ s
-decrError x = x
-
-incrInv : ∀ x → decrError (incrError x) ≡ x
-incrInv (list li V.∷ fst) = refl
-incrInv (num i V.∷ fst) = refl
-incrInv (string str V.∷ fst) = refl
-incrInv (function args stmt V.∷ fst) = refl
-incrInv (error (enum˙ n) x V.∷ fst) rewrite incrInvUnit x = refl
-incrInv (error (enum⁼ n) x V.∷ x₁) = refl
-
-impossible : ⊥ → false ≡ true
-impossible ()
-
-reflLemma : ∀ x → (x ℕ.≡ᵇ x) ≡ true
-reflLemma ℕ.zero = refl
-reflLemma (ℕ.suc x) = reflLemma x
-
---notReflReflLemma : ∀ x y → ¬ x ≡ x → (x ℕ.≡ᵇ x) ≡ false
-
-≡ᵇ-sound : ∀ m n → (m ℕ.≡ᵇ n) ≡ true → m ≡ n
-≡ᵇ-sound m n x = ℕp.≡ᵇ⇒≡ m n (subst T (sym x) tt)
-
-notReflLemma : ∀ x y → ¬ x ≡ y → (x ℕ.≡ᵇ y) ≡ false
-notReflLemma x y x≢y with x ℕ.≡ᵇ y | inspect (x ℕ.≡ᵇ_) y
-... | false | _      = refl
-... | true  | [ eq ] = ⊥-elim (x≢y (≡ᵇ-sound x y eq))
