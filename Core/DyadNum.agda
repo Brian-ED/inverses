@@ -98,6 +98,15 @@ numFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     ifNotRefl : ∀ {x y : Stack 2} n → (p : (n ℕ.≡ᵇ errO) ≡ false) → (if n ℕ.≡ᵇ errO then x else y) ≡ y
     ifNotRefl n p = Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ p))
 
+    if_≡errO-then_else_ : ∀ n → {x y z w : Stack 2} → (l : (n ℕ.≡ᵇ errO) ≡ true → x ≡ z) → (r : (n ℕ.≡ᵇ errO) ≡ false → y ≡ w) → (if n ℕ.≡ᵇ errO then x else y) ≡ (if n ℕ.≡ᵇ errO then z else w)
+    if_≡errO-then_else_ n l r with n ℕ.≡ᵇ errO
+    ... | true = l refl
+    ... | false = r refl
+
+    distrib-if : (b : Bool) {x y : Stack 2} → (f : Stack 2 → Stack 2) → (f (if b then x else y)) ≡ (if b then f x else f y)
+    distrib-if false f = refl
+    distrib-if true  f = refl
+
     invʳ : ∀ {x} → f˙´ (f⁼´ x) ≡ x
     invʳ {list li V.∷ x₁ V.∷ V.[]} = ifRefl
     invʳ {string str V.∷ x₁ V.∷ V.[]} = ifRefl
@@ -158,46 +167,31 @@ numFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     invʳ {error (enum⁼ n) (error n₁ x) V.∷ x₁ V.∷ V.[]} = Bp.if-cong (reflLemma errO)
 
     invˡ : ∀ {x} → f⁼´ (f˙´ x) ≡ x
-    invˡ {num i₁                           V.∷ num i₂            V.∷ V.[]} = cong (V._∷ num i₂ V.∷ V.[]) (cong num (f-invˡ i₂ i₁))
-    invˡ {list _                           V.∷ _                 V.∷ V.[]} = ifRefl
-    invˡ {string _                         V.∷ _                 V.∷ V.[]} = ifRefl
-    invˡ {function _ _ _                   V.∷ _                 V.∷ V.[]} = ifRefl
-    invˡ {num _                            V.∷ list _            V.∷ V.[]} = ifRefl
-    invˡ {num _                            V.∷ string _          V.∷ V.[]} = ifRefl
-    invˡ {num _                            V.∷ function _ _ _    V.∷ V.[]} = ifRefl
-    invˡ {num _                            V.∷ error (enum⁼ _) _ V.∷ V.[]} = ifRefl
-    invˡ {num _                            V.∷ error (enum˙ _) _ V.∷ V.[]} = ifRefl
-    invˡ {error (enum˙ _) (list _)         V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
-    invˡ {error (enum˙ _) (num _)          V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
-    invˡ {error (enum˙ _) (string _)       V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
-    invˡ {error (enum˙ _) (function _ _ _) V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
-    invˡ {error (enum˙ _) (error _ _)      V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
-    invˡ {error (enum⁼ n) (list _) V.∷ _ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
-    ... | true = cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl
-    ... | false = trans ifRefl (Bp.if-cong p)
-    invˡ {error (enum⁼ n) (string _) V.∷ _ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
-    ... | true = cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl
-    ... | false = trans ifRefl (ifNotRefl n p)
-    invˡ {error (enum⁼ n) (function _ _ _) V.∷ _ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
-    ... | true = cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl
-    ... | false = trans ifRefl (ifNotRefl n p)
-    invˡ {error (enum⁼ n) (error (enum⁼ _) _) V.∷ _ V.∷ V.[]} with n ℕ.≡ᵇ errO in p
-    ... | true = cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl
-    ... | false = trans ifRefl (ifNotRefl n p)
+    invˡ {num i₁                                        V.∷ num i₂            V.∷ V.[]} = cong (V._∷ num i₂ V.∷ V.[]) (cong num (f-invˡ i₂ i₁))
+    invˡ {list _                                        V.∷ _                 V.∷ V.[]} = ifRefl
+    invˡ {string _                                      V.∷ _                 V.∷ V.[]} = ifRefl
+    invˡ {function _ _ _                                V.∷ _                 V.∷ V.[]} = ifRefl
+    invˡ {num _                                         V.∷ list _            V.∷ V.[]} = ifRefl
+    invˡ {num _                                         V.∷ string _          V.∷ V.[]} = ifRefl
+    invˡ {num _                                         V.∷ function _ _ _    V.∷ V.[]} = ifRefl
+    invˡ {num _                                         V.∷ error (enum⁼ _) _ V.∷ V.[]} = ifRefl
+    invˡ {num _                                         V.∷ error (enum˙ _) _ V.∷ V.[]} = ifRefl
+    invˡ {error (enum˙ _) (list _)                      V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
+    invˡ {error (enum˙ _) (num _)                       V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
+    invˡ {error (enum˙ _) (string _)                    V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
+    invˡ {error (enum˙ _) (function _ _ _)              V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
+    invˡ {error (enum˙ _) (error _ _)                   V.∷ _                 V.∷ V.[]} = Bp.if-cong (reflLemma errO)
+    invˡ {error (enum⁼ n) (list li)                     V.∷ _                 V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (string _)                    V.∷ _                 V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (function _ _ _)              V.∷ _                 V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (error (enum⁼ _) _)           V.∷ _                 V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ list _            V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ string _          V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ function _ _ _    V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ error (enum⁼ _) _ V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ error (enum˙ a) b V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ x₁))) refl) refl)  else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
+    invˡ {error (enum⁼ n) (num i)                       V.∷ num _             V.∷ V.[]} = trans (distrib-if (n ℕ.≡ᵇ errO) f⁼´) (trans (if n ≡errO-then (λ x₁ → Bp.if-cong x₁) else λ x₁ → trans ifRefl (trans (Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ x₁))) refl)) (trans (Bp.if-cong₂ (n ℕ.≡ᵇ errO) refl  refl) (Bp.if-eta (n ℕ.≡ᵇ errO))))
 
-    invˡ {error (enum⁼ n) (num i) V.∷ x V.∷ V.[]} with n ℕ.≡ᵇ errO in p | x
-    ... | true  | num _             = trans (cong f⁼´ (Bp.if-cong p)) (Bp.if-cong p)
-    ... | true  | list _            = trans (cong f⁼´ (Bp.if-cong p)) (cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl)
-    ... | true  | string _          = trans (cong f⁼´ (Bp.if-cong p)) (cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl)
-    ... | true  | function _ _ _    = trans (cong f⁼´ (Bp.if-cong p)) (cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl)
-    ... | true  | error (enum⁼ _) _ = trans (cong f⁼´ (Bp.if-cong p)) (cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl)
-    ... | true  | error (enum˙ _) _ = trans (cong f⁼´ (Bp.if-cong p)) (cong₂ V._∷_ (cong₂ error (cong enum⁼ (sym (≡ᵇt→≡ p))) refl) refl)
-    ... | false | num _             = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
-    ... | false | list _            = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
-    ... | false | string _          = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
-    ... | false | function _ _ _    = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
-    ... | false | error (enum⁼ _) _ = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
-    ... | false | error (enum˙ a) b = trans (cong f⁼´ (ifNotRefl n p)) (trans ifRefl (ifNotRefl n p))
     invˡ {error (enum⁼ n₁) (error (enum˙ n₂) x₁) V.∷ x₂ V.∷ V.[]} with n₁ ℕ.≡ᵇ errO in p | n₂ ℕ.≡ᵇ errO in q | x₁ | x₂
     ... | false | B     | a                     | b                     = trans ifRefl (ifNotRefl n₁ p)
     ... | true  | true  | a                     | b                     = trans (Bp.if-cong p) (Bp.if-cong q)
