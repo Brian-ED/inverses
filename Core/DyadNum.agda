@@ -94,11 +94,6 @@ numFuncToPrim f˙ f⁼ f-invʳ f-invˡ errO = ⟨
     ifNotRefl : ∀ {x y : Stack 2} n → (p : (n ℕ.≡ᵇ errO) ≡ false) → (if n ℕ.≡ᵇ errO then x else y) ≡ y
     ifNotRefl n p = Bp.if-cong (notReflLemma n errO (≡ᵇf→≡ n errO p))
 
-    if_≡errO-then_else_ : ∀ n → {x y z w : Stack 2} → (l : (n ℕ.≡ᵇ errO) ≡ true → x ≡ z) → (r : (n ℕ.≡ᵇ errO) ≡ false → y ≡ w) → (if n ℕ.≡ᵇ errO then x else y) ≡ (if n ℕ.≡ᵇ errO then z else w)
-    if_≡errO-then_else_ n l r with n ℕ.≡ᵇ errO
-    ... | true = l refl
-    ... | false = r refl
-
     invʳ : ∀ {x} → f˙´ (f⁼´ x) ≡ x
     invʳ {list li V.∷ x₁ V.∷ V.[]} = ifRefl
     invʳ {string str V.∷ x₁ V.∷ V.[]} = ifRefl
