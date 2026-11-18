@@ -2,7 +2,7 @@
 
 
 
-eval ← •ReBQN evalDef← {
+evalDef ⇐ {
 
   # GenErrorCheckedDyadAsModifier
   gECDAM_ ← {
@@ -47,7 +47,7 @@ eval ← •ReBQN evalDef← {
 
   AreNums ← {o⊣{o∧↩1≡•Type𝕩}⚇0𝕩⊣o←1}
 
-  GenErrorCheckedMona ← {{
+  GenErrorCheckedMonad ← {{
      norErr‿invErr‿NorChk‿InvChk _𝕣_ Op⁼l‿r: norErr≡l? r ;norErr‿invErr‿NorChk‿InvChk _𝕣_ Op⁼𝕩: InvChk𝕩? 𝕩≡Op Op⁼𝕩? Op⁼𝕩 ;norErr‿invErr‿NorChk‿InvChk _𝕣_ Op⁼𝕩:invErr‿𝕩
     ;norErr‿invErr‿NorChk‿InvChk _𝕣_ Op l‿r: invErr≡l? r ;norErr‿invErr‿NorChk‿InvChk _𝕣_ Op 𝕩: NorChk𝕩? 𝕩≡Op⁼Op 𝕩? Op 𝕩 ;norErr‿invErr‿NorChk‿InvChk _𝕣_ Op 𝕩:norErr‿𝕩
   }}˙ Mod2 ⋈
@@ -55,21 +55,67 @@ eval ← •ReBQN evalDef← {
   primitives ⇐ ⟨
     ⟨'+' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1‿1≡AreNums¨ ⋄ 1‿1≡AreNums¨⟩ GECD {+} ⟩
     ⟨'-' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1‿1≡AreNums¨ ⋄ 1‿1≡AreNums¨⟩ GECD {-} ⟩
+    ⟨'*' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ (•Type¨0‿0)≡•Type¨ ⋄ 1‿1≡AreNums¨⟩ GECD {{·𝕊𝕩:𝕨Times𝕩; ·𝕊⁼𝕩:𝕨Times⁼𝕩; ·𝕊˜⁼𝕩:𝕨Times˜⁼𝕩}} ⟩
+    ⟨'×' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ (•Type¨0‿0)≡•Type¨ ⋄ 1‿1≡AreNums¨⟩ GECD {{·𝕊𝕩:𝕨Times𝕩; ·𝕊⁼𝕩:𝕨Times⁼𝕩; ·𝕊˜⁼𝕩:𝕨Times˜⁼𝕩}} ⟩
     ⟨'⋈' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ {𝕊⟨w⋄a‿b⟩: w≡a; 0} ⟩ GECD {⋈} ⟩
+    ⟨'∘' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1                  ⟩ GECD {{𝕨𝕊⁼𝕩: 5‿𝕨‿∘⊸∾∘⋈⁼ •Decompose 𝕩 ; 𝕨∘𝕩}}  ⟩
     ⟨'⍟' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ AreNums⊢´ ⋄ 1 ⟩ GECD {{⇐}‿{⇐} ExtendDyadToMonad {⇐}‿{⇐}‿1‿1 GECD {⍟}˙ Mod2 ⋈} ⟩
     ⟨'`' ⋄ {⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {𝕏`}𝕗 } ⟩
-    ⟨'⁼' ⋄ {{⊢} ≡○•Type 𝕗? 𝔽⁼; ⟨ {⇐} ⋄ {⇐} ⋄ 𝕗⊸≡ ⋄ 1 ⟩ GenErrorCheckedMona {𝕏⁼}𝕗 } ⟩
-    ⟨'⥊' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {⥊} ⟩ # Perfect reshape
+    ⟨'⁼' ⋄ {{⊢} ≡○•Type 𝕗? 𝔽⁼; ⟨ {⇐} ⋄ {⇐} ⋄ 𝕗⊸≡ ⋄ 1 ⟩ GenErrorCheckedMonad {𝕏⁼}𝕗 } ⟩
+    ⟨'⥊' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ ≡⟜≢´ ⟩ GECD {{𝕊⁼: ⥊𝕩; 𝕨⥊𝕩}} ⟩ # Perfect reshape
     ⟨'/' ⋄ {⇐}‿{⇐} ExtendDyadToMonad ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GECD {/} ⟩ # Replicate
-    ⟨'<' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GenErrorCheckedMona {⋈} ⟩ # Replicate
-    ⟨'⍪' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ {2≡≠𝕩} ⋄ 1 ⟩ GenErrorCheckedMona {{𝕊⁼𝕩: 1(⋈⁼∘↑⋈↓)𝕩 ;𝕊𝕩:⋈⊸∾´𝕩}} ⟩
+    ⟨'<' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ 1 ⋄ 1 ⟩ GenErrorCheckedMonad {⋈} ⟩ # Replicate
+    ⟨'↕' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ AreNums ⋄ {1=≡𝕩? ∧´1=AreNums¨𝕩; 2=≡𝕩? 1∘(↕⁼)⎊0𝕩 ;0} ⟩ GenErrorCheckedMonad {↕} ⟩
+    ⟨'⌽' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ 0<= ⋄ 0<= ⟩ GenErrorCheckedMonad {⌽} ⟩ # Flip
+    ⟨'⍉' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ 0<= ⋄ 0<= ⟩ GenErrorCheckedMonad {⌽} ⟩ # Transpose
+    ⟨'⍪' ⋄ ⟨ {⇐} ⋄ {⇐} ⋄ {2≡≠𝕩} ⋄ 1 ⟩ GenErrorCheckedMonad {{𝕊⁼𝕩: 1(⋈⁼∘↑⋈↓)𝕩 ;𝕊𝕩:⋈⊸∾´𝕩}} ⟩
   ⟩
   primitives∾↩⟨
     ⟨'%',"Didn't match"!≡⟩
   ⟩
+  repl⇐"loose"
 }
 
-•Show Eval "
+Times↩×
+#  1‿𝕩 ≡ 0× 𝕩
+# ¯1‿𝕩 ≡ 0×⁼𝕩 ≡ 0÷˜𝕩 ≡ 𝕩÷0
+# TODO: Oh if a in a‿b is negative then b isn't 0
+#{  l‿0𝕊 r‿x:     x {0≡𝕩?𝕨; 𝕩⋈𝕨}  1+l+ r
+#      ;  l‿0𝕊⁼r‿x:     x {0≡𝕩?𝕨; 𝕩⋈𝕨} ¯1+l-˜r
+#      ;  l‿w𝕊 r‿0:     w {0≡𝕩?𝕨; 𝕩⋈𝕨}  1+l+ r
+#      ;  l‿w𝕊⁼r‿0: (  ÷w){0≡𝕩?𝕨; 𝕩⋈𝕨}  1+l-˜r
+#      ;  l‿w𝕊 r‿x: (w× x){0≡𝕩?𝕨; 𝕩⋈𝕨}    l+ r
+#      ;  l‿w𝕊⁼r‿x: (w÷˜x){0≡𝕩?𝕨; 𝕩⋈𝕨}    l-˜r
+#
+#      ;  l‿w𝕊 0:   w {0≡𝕩?𝕨; 𝕩⋈𝕨} l+1
+#      ;  l‿w𝕊⁼0: (÷w){0≡𝕩?𝕨; 𝕩⋈𝕨} -l
+#      ;  w𝕊 0: 1‿w
+#      ;  w𝕊⁼0: ¯1⋈÷w
+#      ;  0𝕊 r‿x:  x {0≡𝕩?𝕨; 𝕩⋈𝕨} r+1
+#      ;  0𝕊⁼r‿x:  x {0≡𝕩?𝕨; 𝕩⋈𝕨} r-1
+#      ;  0𝕊 x: 1‿x
+#      ;  0𝕊⁼x: ¯1‿x
+#      ;  l‿0𝕊 0: {0≡𝕩?𝕨; 𝕩⋈𝕨} l+1
+#      ;  l‿0𝕊 x: ?
+#      ;  l‿w𝕊 x: l⋈w×x
+#      ;  l‿w𝕊⁼x: ?
+#      ;  w𝕊 r‿0: ?
+#      ;  w𝕊 r‿x: r⋈w×x
+#      ;  w𝕊⁼r‿x: ?
+#      ;  w𝕊 x: w× x
+#      ;  w𝕊⁼x: w÷˜x
+#}
+
+[fnNames⋄fns]←⍉>evalDef.primitives
+
+rere ← •ReBQN evalDef
+
+NextLine ← {line𝕊argL:
+  (Rere line) {𝔽} argL
+}
+
+# Initial tests
+Rere "
   2% + +⁼2
   2% +⁼ - -⁼ +2
   2% +⁼ +2
@@ -114,31 +160,30 @@ eval ← •ReBQN evalDef← {
 
   ⍪2⋈⍪⟨1⋄ ⟨⟩⟩
 "
-  #(+2)⁼∘((+2)⁼)
 
+# Encodable and decodable function calls
+#F ← {𝕊(𝕨⋈𝕩)∾⋈}
+#D←{1≡•Type𝕩?𝕩; 0≡•Type𝕩? 𝕊¨𝕩; 𝕊{2‿·‿x:x;3‿x‿·‿·:x}•Decompose𝕩}
+#D {7𝕏6} {𝕏5} {𝕏4} 3 F {2𝕏1} F 1
 
-#t ← •ReBQN {⇐
-#  X←⊢
-#  F←{name‿conds⇐𝕩}
-#
-#  _ExtendDyadToMonad ← {OP _𝕣:
-#    errID←{⇐}
-#    F←{𝕩⊸OP}
-#    F⊘(F⊸{𝕊⁼:𝕎⁼𝕩; 𝕎𝕩})
-#  }
-#  primitives ⇐ ⟨
-#                # InputOutput
-#    ⟨'+' ⋄ (F'+'⋈"NN") {g←𝕗 ⋄ {𝕊𝕩: (⟨𝕩⟩⋈g⋈⊢) ; }} ⟩
-#    ⟨'-' ⋄ (F'-'⋈"NN") {g←𝕗 ⋄ {𝕊𝕩: (⟨𝕩⟩⋈g⋈⊢) ; }} ⟩
-#    ⟨'⋈' ⋄ (F'⋈'⋈"AP") {g←𝕗 ⋄ {𝕊𝕩: (⟨𝕩⟩⋈g⋈⊢) ; }} ⟩
-#    ⟨'⍟' ⋄ ! ⟩ # COMPLICATED
-#    ⟨'⁼' ⋄ {𝕗} ⟩
-#    ⟨'∘' ⋄ {𝕗‿𝕘} ⟩
-#    ⟨'%' ⋄ •Show⊢ ⟩
-#  ⟩ (⊣⊣ (!⍟≠¬∘∊/⊢)○(⊑¨))evalDef.primitives
-#}
+# Helps me test with non-BQNers
+ReRe "
+  Plus ← +
+  Minus ← -
+  Pow ← *
+  Mult ← ×
+  Pair ← ⋈
+  Compose ← ∘
+  Power ← ⍟
+  _Accumulate ← `
+  _Inv ← ⁼
+  Reshape ← ⥊
+  Replicate ← /
+  Enlist ← <
+  Range ← ↕
+  Flip ← ⌽
+  Transpose ← ⍉
+  Append ← ⍪
+"
 
-#F ← {𝕊(𝕨⋈𝕩)∾⋈} ⋄ D←{1≡•Type𝕩?𝕩; 0≡•Type𝕩? 𝕊¨𝕩; 𝕊{2‿·‿x:x;3‿x‿·‿·:x}•Decompose𝕩} ⋄ D {7𝕏6} {𝕏5} {𝕏4} 3 F {2𝕏1} F 1
-
-## GOAL implement variables somehow as functions assigning to a namespace that's passed around
-#•Show T 𝕩
+•GetLine⊸NextLine∘(⊢⊣·•Out•Fmt)•_while_ 1 Rere •GetLine@
